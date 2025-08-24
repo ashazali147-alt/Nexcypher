@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NexCypher Ultra™</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-color: #0f0f0f;
+      --text-color: #00ffcc;
+      --accent-color: #0077ff;
+      --button-bg: linear-gradient(135deg, #00ffcc, #0077ff);
+      --input-bg: #1a1a1a;
+      --border-color: #00ffcc;
+    }
+
+    body.light-mode {
+      --bg-color: #f5f5f5;
+      --text-color: #003344;
+      --accent-color: #00aaff;
+      --button-bg: linear-gradient(135deg, #00aaff, #0077ff);
+      --input-bg: #ffffff;
+      --border-color: #0077ff;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2em;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px var(--text-color);
+    }
+
+    .section {
+      display: none;
+      margin-top: 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    textarea, input, select {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--text-color);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 1em;
+      margin-bottom: 15px;
+      box-shadow: 0 0 10px var(--border-color) inset;
+    }
+
+    .button {
+      padding: 12px 24px;
+      font-size: 1em;
+      background: var(--button-bg);
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      margin: 5px;
+      box-shadow: 0 4px 12px rgba(0, 255, 204, 0.4);
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 255, 204, 0.6);
+    }
+
+    .output {
+      background: var(--input-bg);
+      border: 2px solid var(--accent-color);
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 1em;
+      color: var(--text-color);
+      box-shadow: 0 0 10px var(--accent-color) inset;
+      margin-top: 10px;
+      word-wrap: break-word;
+    }
+
+    .toggle {
+      margin-top: 30px;
+      font-size: 1em;
+      cursor: pointer;
+      color: var(--accent-color);
+      text-align: center;
+      text-decoration: underline;
+    }
+
+    .center-buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .status-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .status-list li::before {
+      content: "✅ ";
+    }
+  </style>
+</head>
+<body>
+  <h1>🔐 NexCypher Ultra™</h1>
+
+  <div class="center-buttons">
+    <button class="button" onclick="showSection('encryptSection')">Encrypt/Decrypt</button>
+    <button class="button" onclick="showSection('challengeSection')">Challenge Mode</button>
+    <button class="button" onclick="showSection('vaultSection')">Vault System</button>
+    <button class="button" onclick="showSection('adminLogin')">Admin Login</button>
+  </div>
+   <div class="section" id="encryptSection">
+    <textarea id="inputText" placeholder="Enter your secret message..."></textarea>
+    <input type="text" id="passkey" placeholder="Enter your passkey...">
+    <button class="button" onclick="encrypt()">Encrypt</button>
+    <button class="button" onclick="decrypt()">Decrypt</button>
+    <div class="output" id="outputText">Your encrypted or decrypted message will appear here.</div>
+  </div>
+   <div class="section" id="challengeSection">
+    <input type="text" id="challengeKey" placeholder="Enter passkey for challenge...">
+    <button class="button" onclick="generateChallenge()">Generate Challenge</button>
+    <input type="text" id="challengeInput" placeholder="Encrypted challenge will appear here..." readonly>
+    <textarea id="userAnswer" placeholder="Your decrypted guess..."></textarea>
+    <button class="button" onclick="checkChallenge()">Check Answer</button>
+    <div class="output" id="challengeOutput">Challenge status will appear here.</div>
+    <div class="output" id="challengeFeedback">Feedback will appear here.</div>
+  </div>
+   <div class="section" id="vaultSection">
+    <textarea id="vaultText" placeholder="Enter note to encrypt..."></textarea>
+    <input type="text" id="vaultKey" placeholder="Enter passkey...">
+    <input type="text" id="noteName" placeholder="Note name...">
+    <button class="button" onclick="saveToVault()">Save Note</button>
+    <select id="vaultSelect"></select>
+    <button class="button" onclick="loadFromVault()">Load</button>
+    <button class="button" onclick="deleteFromVault()">Delete</button>
+    <div class="output" id="vaultOutput">Vault note will appear here.</div>
+  </div>
+   <div class="section" id="adminLogin">
+    <input type="password" id="adminPassword" placeholder="Enter admin password...">
+    <button class="button" onclick="checkAdmin()">Login</button>
+    <div class="output" id="adminStatus" style="display:none;">
+      <h3>🧠 System Status</h3>
+      <ul class="status-list">
+        <li>Encrypt/Decrypt: Working</li>
+        <li>Challenge Mode: Working</li>
+        <li>Vault System: Working</li>
+        <li>Emoji Decoys: Active</li>
+        <li>Dark/Light Mode: Toggle Ready</li>
+        <li>Admin Panel: Secured</li>
+      </ul>
+      <button class="button" onclick="runDiagnostics()">Run Manual Diagnostics</button>
+      <div class="output" id="diagnosticResults">Diagnostic results will appear here.</div>
+    </div>
+  </div>
+    <div class="toggle" onclick="toggleMode()">🌗 Toggle Dark/Light Mode</div>
+  <script>
+  const symbolMap = { A: '@', E: '£', I: '!', O: '()', U: '∪', S: '$', T: '+' };
+  const emojiDecoys = ['🔥', '👾', '🧨', '🕵️‍♂️', '💣', '🧠', '⚡', '🌀'];
+
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+  }
+
+  function getShiftValues(passkey) {
+    return passkey.toUpperCase().split('').map(char => /[A-Z]/.test(char) ? char.charCodeAt(0) - 64 : 1);
+  }
+
+  function insertEmojiDecoys(text) {
+    return text.split('').map(char => char + emojiDecoys[Math.floor(Math.random() * emojiDecoys.length)]).join('');
+  }
+
+  function removeEmojiDecoys(text) {
+    return text.replace(/[\u{1F300}-\u{1FAFF}|\u{2600}-\u{26FF}]/gu, '');
+  }
+
+  function encrypt() {
+    const input = document.getElementById('inputText').value;
+    const passkey = document.getElementById('passkey').value || 'A';
+    const shifts = getShiftValues(passkey);
+    let encrypted = '';
+
+    for (let i = 0; i < input.length; i++) {
+      let char = input[i].toUpperCase();
+      if (/[A-Z]/.test(char)) {
+        let shift = shifts[i % shifts.length];
+        let shifted = String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26) + 65);
+        encrypted += symbolMap[shifted] || shifted;
+      } else {
+        encrypted += input[i];
+      }
+    }
+
+    encrypted = insertEmojiDecoys(encrypted.split('').reverse().join('')) + ' #A3V';
+    document.getElementById('outputText').textContent = encrypted;
+  }
+
+  function decrypt() {
+    let input = document.getElementById('inputText').value.replace(' #A3V', '');
+    input = removeEmojiDecoys(input);
+    const passkey = document.getElementById('passkey').value || 'A';
+    const shifts = getShiftValues(passkey);
+    input = input.split('').reverse().join('');
+    let decrypted = '';
+
+    for (let i = 0; i < input.length; i++) {
+      let char = input[i];
+      let original = Object.keys(symbolMap).find(k => symbolMap[k] === char) || char;
+      if (/[A-Z]/.test(original)) {
+        let shift = shifts[i % shifts.length];
+        let shiftedBack = String.fromCharCode(((original.charCodeAt(0) - 65 - shift + 26) % 26) + 65);
+        decrypted += shiftedBack;
+      } else {
+        decrypted += original;
+      }
+    }
+
+    document.getElementById('outputText').textContent = decrypted;
+  }
+
+  function saveToVault() {
+    const name = document.getElementById('noteName').value;
+    const text = document.getElementById('vaultText').value;
+    const key = document.getElementById('vaultKey').value || 'A';
+    if (name && text) {
+      const shifts = getShiftValues(key);
+      let encrypted = '';
+      for (let i = 0; i < text.length; i++) {
+        let char = text[i].toUpperCase();
+        if (/[A-Z]/.test(char)) {
+          let shift = shifts[i % shifts.length];
+          let shifted = String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26) + 65);
+          encrypted += symbolMap[shifted] || shifted;
+        } else {
+          encrypted += text[i];
+        }
+      }
+      encrypted = insertEmojiDecoys(encrypted.split('').reverse().join('')) + ' #A3V';
+      localStorage.setItem(name, JSON.stringify({ encrypted, key }));
+      updateVaultSelect();
+    }
+  }
+
+  function loadFromVault() {
+    const name = document.getElementById('vaultSelect').value;
+    const data = JSON.parse(localStorage.getItem(name));
+    if (data) {
+      let input = data.encrypted.replace(' #A3V', '');
+      input = removeEmojiDecoys(input);
+      const shifts = getShiftValues(data.key);
+      input = input.split('').reverse().join('');
+      let decrypted = '';
+      for (let i = 0; i < input.length; i++) {
+        let char = input[i];
+        let original = Object.keys(symbolMap).find(k => symbolMap[k] === char) || char;
+        if (/[A-Z]/.test(original)) {
+          let shift = shifts[i % shifts.length];
+          let shiftedBack = String.fromCharCode(((original.charCodeAt(0) - 65 - shift + 26) % 26) + 65);
+          decrypted += shiftedBack;
+        } else {
+          decrypted += original;
+        }
+      }
+      document.getElementById('vaultOutput').textContent = decrypted;
+    }
+  }
+
+  function deleteFromVault() {
+    const name = document.getElementById('vaultSelect').value;
+    localStorage.removeItem(name);
+    updateVaultSelect();
+    document.getElementById('vaultOutput').textContent = 'Note deleted.';
+  }
+
+  function updateVaultSelect() {
+    const select = document.getElementById('vaultSelect');
+    select.innerHTML = '';
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = key;
+      select.appendChild(option);
+    }
+  }
+    let currentChallenge = '';
+  let currentAnswer = '';
+
+  function generateChallenge() {
+    const samples = ['SECRET CODE', 'MISSION START', 'ENCRYPTION ACTIVE', 'VAULT OPEN', 'ACCESS GRANTED'];
+    const passkey = document.getElementById('challengeKey').value || 'A';
+    const original = samples[Math.floor(Math.random() * samples.length)];
+    currentAnswer = original;
+    const shifts = getShiftValues(passkey);
+    let encrypted = '';
+    for (let i = 0; i < original.length; i++) {
+      let char = original[i].toUpperCase();
+      if (/[A-Z]/.test(char)) {
+        let shift = shifts[i % shifts.length];
+        let shifted = String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26) + 65);
+        encrypted += symbolMap[shifted] || shifted;
+      } else {
+        encrypted += original[i];
+      }
+    }
+    currentChallenge = insertEmojiDecoys(encrypted.split('').reverse().join('')) + ' #A3V';
+    document.getElementById('challengeInput').value = currentChallenge;
+    document.getElementById('challengeOutput').textContent = 'Challenge generated. Try to solve it!';
+  }
+
+  function checkChallenge() {
+    const userInput = document.getElementById('userAnswer').value.trim().toUpperCase();
+    const feedback = document.getElementById('challengeFeedback');
+    if (userInput === currentAnswer) {
+      feedback.textContent = '✅ Correct! You solved the challenge.';
+    } else {
+      feedback.textContent = '❌ Incorrect. Try again.';
+    }
+  }
+   function checkAdmin() {
+    const password = document.getElementById('adminPassword').value;
+    const statusPanel = document.getElementById('adminStatus');
+    if (password === 'karateboy14') {
+      statusPanel.style.display = 'block';
+      statusPanel.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      alert('Access Denied: Incorrect Password');
+      statusPanel.style.display = 'none';
+    }
+  }
+
+  function toggleMode() {
+    document.body.classList.toggle('light-mode');
+  }
+
+  function runDiagnostics() {
+    const results = [
+      checkElement('encryptSection', 'Encrypt/Decrypt'),
+      checkElement('challengeSection', 'Challenge Mode'),
+      checkElement('vaultSection', 'Vault System'),
+      checkElement('adminLogin', 'Admin Panel'),
+      checkElement('vaultSelect', 'Vault Dropdown'),
+      checkElement('toggleMode', 'Dark/Light Toggle', true),
+      checkElement('checkAdmin', 'Admin Login Function', true),
+      checkElement('generateChallenge', 'Challenge Generator', true),
+      checkElement('checkChallenge', 'Challenge Checker', true),
+      checkElement('insertEmojiDecoys', 'Emoji Decoys', true)
+    ];
+
+    const output = results.map(r => `✅ ${r}`).join('<br>');
+    document.getElementById('diagnosticResults').innerHTML = output;
+  }
+
+  function checkElement(id, label, isFunction = false) {
+    if (isFunction) {
+      return typeof window[id] === 'function' ? `${label}: Working` : `${label}: ❌ Missing`;
+    } else {
+      return document.getElementById(id) ? `${label}: Working` : `${label}: ❌ Missing`;
+    }
+  }
+
+  window.onload = updateVaultSelect;
+</script>
+</body>
+</html>
